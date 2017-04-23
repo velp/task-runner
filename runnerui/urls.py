@@ -19,6 +19,7 @@ from django.views.generic import TemplateView
 from tasks.views import TasksView
 
 urlpatterns = [
+    url(r'^admin/', admin.site.urls),
     # index
     url(r'^$', TemplateView.as_view(template_name="index.html"), name='task-list'),
     # urls for AJAX requests

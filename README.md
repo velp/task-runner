@@ -1,8 +1,16 @@
 # Task runner #
 
-Simple task manager on Django with PostgreSQL database.
+Simple task manager on Python 3 Django with PostgreSQL database and Celery.
 
 ## Installation
+
+### Create Enviroment
+
+```python
+virtualenv -p python3 env
+source ./env/bin/activate
+pip install -r requirements.txt
+```
 
 ### Create database (PostgreSQL 9.3)
 
@@ -22,9 +30,21 @@ root@d51c3c54e339:/# exit
 exit
 ```
 
-and setup django database
+and sync
 
 ```bash
-python ./manage.py migrate --run-syncdb
+python manage.py migrate --run-syncdb
+```
+
+## Run
+
+### Run celery
+```python
+python manage.py celeryd
+```
+
+### Run UI
+```python
+python manage.py runserver 127.0.0.1:8080
 ```
 

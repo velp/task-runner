@@ -1,9 +1,8 @@
 import json
 from django.views import View
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-
 from tasks.models import Task
+from tasks.tasks import some_task
 
 
 class TasksView(View):
@@ -14,8 +13,8 @@ class TasksView(View):
             data.append(task.serialize)
         return HttpResponse(json.dumps(data))
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         task = Task()
         task.save()
+        some_task.delay(task.id)
         return HttpResponse(json.dumps(task.serialize))

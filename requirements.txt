@@ -1,2 +1,6 @@
 django>=1.6
 psycopg2
+# https://github.com/celery/django-celery/issues/491
+celery==3.1.25
+django-celery
+django-kombu
