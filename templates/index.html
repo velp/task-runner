@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <title>Task runner interface</title>
+        <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+        <style>
+            body {
+                padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+            }
+        </style>
+        <link href="{% static "bootstrap/css/bootstrap-responsive.css" %}" rel="stylesheet">
+        <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+        <script src="{% static "jquery-3.2.1.min.js" %}" type="text/javascript"></script>
+        <script src="{% static "bootstrap/js/bootstrap.js" %}" type="text/javascript"></script>
+        <script type="text/javascript">
+            jQuery(document).ready(function($){
+                function show_success_msg(task_pk) {
+                    $("#task-add-success").text("new task " + task_pk + " create");
+                    $("#task-add-success").show();
+                    window.setTimeout(function() { $("#task-add-success").hide(); }, 2000);
+                }
+                function show_error_msg() {
+                    $("#task-add-error").show();
+                    window.setTimeout(function() { $("#task-add-success").hide(); }, 2000);
+                }
+                function add_task() {
+                    $.ajax({
+                        url : "task/",
+                        type: "POST",
+                        data : {csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value},
+                        success: function( data ){
+                            task = JSON.parse(data)
+                            if(task.hasOwnProperty('id')) {
+                                //console.log(task.id + ' ' + task.create_time + ' ' + task.finish_time + ' ' + task.status)
+                                $('#tasks-table').append('<tr><td>' + task.id + '</td><td>' + task.create_time + '</td><td>' + task.finish_time + '</td><td>' + task.status + '</td></tr>');
+                                show_success_msg(task.id);
+                            } else {
+                                show_error_msg();
+                            }
+                        }
+                    });
+                }
+                function first_load_tasks() {
+                    $("#tasks-table").find("tr:gt(0)").remove();
+                    $.get( "task/", function( data ) {
+                        tasks = JSON.parse(data)
+                        for(i = 0; i < tasks.length; i++) {
+                            $('#tasks-table').append('<tr><td>' + tasks[i].id + '</td><td>' + tasks[i].create_time + '</td><td>' + tasks[i].finish_time + '</td><td>' + tasks[i].status + '</td></tr>');
+                        }
+                    });
+                }
+                function update_statuses() {
+                    $.get( "task/", function( data ) {
+                        tasks = JSON.parse(data)
+                        for(i = 0; i < tasks.length; ++i) {
+                            task_row = $("tr td:first-child").filter(function() {
+                                return $(this).text() == tasks[i].id
+                            }).parent()
+                            //console.log(tasks[i].id, task_row.find("td:eq(2)").text(), task_row.find("td:eq(3)").text())
+                            // update finish time and status
+                            task_row.find("td:eq(2)").text(tasks[i].finish_time)
+                            task_row.find("td:eq(3)").text(tasks[i].status)
+                        }
+                    });
+                }
+                $( "#task-add" ).click(function() {
+                    add_task();
+                });
+                first_load_tasks();
+                // auto update statuses
+                //setInterval(update_statuses, 3000);
+            });
+        </script>
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand">Task runner interface</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="content">
+            <table class="table table-bordered table-striped" id="tasks-table">
+                <tr>
+                    <th>№</th>
+                    <th>Создано</th>
+                    <th>Завершено</th>
+                    <th>Текущий статус</th>
+                </tr>
+            </table>
+            {% csrf_token %}
+            <div class="alert alert-success" role="alert" id="task-add-success" style="display: none;">new task create</div>
+            <div class="alert alert-danger" role="alert" id="task-add-error" style="display: none;">error adding new task</div>
+            <button class="btn btn-primary" type="submit" id="task-add">Add task</button>
+        </div>
+    </body>
+</html>
